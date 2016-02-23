@@ -4,9 +4,12 @@
   "description": "Shopping kart mainly for mobile phones",
   "main": "server.js",
   "dependencies": {
+    "assert": "^1.3.0",
     "body-parser": "^1.4.3",
+    "chai": "^3.5.0",
     "express": "^4.4.5",
-    "mongoose": "^4.4.4"
+    "mongoose": "^4.4.4",
+    "supertest": "^1.2.0"
   },
   "devDependencies": {},
   "scripts": {
