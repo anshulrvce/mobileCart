@@ -50,7 +50,23 @@ router.get('/api/cart', function(req, res){
 
 router.post('/api/cart', function(req, res) {
   var product_id = req.body.product_id;
-  Product.findOne({id:product_id},function(err, data) {
+   Cart.findOne({id:product_id},function(err, cart) {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    if(cart!=null){
+      cart['quantity']+=1;
+      cart.save(function(err) {
+      if (err) {
+        return res.send(err);
+      }
+
+      res.json({ message: 'Cart updated!' });
+    });
+    }
+    else{
+      Product.findOne({id:product_id},function(err, data) {
     if (err) {
       console.error(err);
       process.exit(1);
@@ -62,29 +78,32 @@ router.post('/api/cart', function(req, res) {
           name: product.name,
           capacity: product.capacity,
           price: product.price,
-          image: product.image
+          image: product.image,
+          quantity:1
         }
+   
     
-      var cart = new Cart(addedProduct);
+     var cart = new Cart(addedProduct);
        cart.save(function(err) {
           if (err) {
             console.error(err);
             process.exit(1);
           }
           res.json(cart);
-        });
-      });
+        });   
   });
+ }
+});
+ });
 
 router.delete('/api/cart', function(req, res) {
-  var product_id = req.query.product_id;
-  console.log("inside delete "+ product_id)
-  Cart.delete({id:product_id},function(err, data) {
+  var product_id = req.body.product_id;
+  Cart.remove({id:product_id},function(err, data) {
     if (err) {
       console.error(err);
       process.exit(1);
     }
-      res.send("item deleted");
+      res.send(data);
   });
 });
 module.exports= router;

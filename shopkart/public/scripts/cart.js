@@ -36,7 +36,7 @@ var ProductBox = React.createClass({
   reloadCart: function(){
     this.loadCartFromServer();
   },
- handleSubmit: function(e) {
+ handleSubmit2: function(e) {
     e.preventDefault();
     console.log(e);
     var id = document.getElementById('product_id').value;
@@ -57,6 +57,7 @@ var ProductBox = React.createClass({
       }.bind(this)
     });
   },
+    
 
   render: function() {
     return (
@@ -76,7 +77,7 @@ var ProductList = React.createClass({
     var carturl = this.props.carturl;
   var productNodes = this.props.data.map(function(product) {
       return (
-        <Product id={product.id} name={product.name} capacity={product.capacity} price={product.price} image={product.image} />
+        <Product carturl="/api/cart" id={product.id} name={product.name} capacity={product.capacity} price={product.price} image={product.image} quantity={product.quantity}/>
       );
     });
     return (
@@ -88,8 +89,23 @@ var ProductList = React.createClass({
 });
 
 var Product = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+    $.ajax({
+      url: this.props.carturl,
+      dataType: 'json',
+      type: 'DELETE',
+      data: {product_id: this.props.id},
+      success: function() {
+       window.location = "/cart.html";
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.carturl, status, err.toString());
+      }.bind(this)
+    });
+  },
   getInitialState: function() {
-    return {formId: '', formName: '', formCapacity: '', formPrice: ''};
+    return {formId: '', formName: '', formCapacity: '', formPrice: '',formQuantity: ''};
   },
   rawMarkup: function() {
     var rawMarkup = marked(this.props.children.toString(), {sanitize: true});
@@ -104,9 +120,15 @@ var Product = React.createClass({
           <div className="productName large-12 columns center-text medium-font medium-padding">{this.props.name}</div>
           <div className="productCapacity large-6 columns center-text small-font small-padding"><span className="alert round">Capacity: {this.props.capacity}</span></div>
           <div className="productPrice large-6 columns center-text small-font small-padding"><span className="alert round">Price: Rs. {this.props.price}</span></div>
+          <div className="productPrice large-6 columns center-text small-font small-padding"><span className="alert round">Quantity: {this.props.quantity}</span></div>
           <div className="productAdd large-12 columns center-text medium-font medium-padding">
             <div className="button primary large-12 columns center-text"><a href={url} className="white">View Details</a></div>
+            <form className="addToCartForm" onSubmit={this.handleSubmit}>
+            <input type="submit" className="button primary" value="Delete from Cart" onClick={this.handleSubmit}/>
+            <input type="hidden" value={this.props.id} />
+          </form>
           </div>
+
         </div>
       </div>
     );

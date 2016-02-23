@@ -4,7 +4,8 @@ var cartSchema = mongoose.Schema({
         "name": String,
         "capacity": String,
         "price": Number,
-        "image": String
+        "image": String,
+        "quantity": Number
     });
 
 module.exports = mongoose.model("cart", cartSchema);
