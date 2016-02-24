@@ -104,6 +104,36 @@ var Product = React.createClass({
       }.bind(this)
     });
   },
+  subtractQuantity: function(e) {
+    e.preventDefault();
+    $.ajax({
+      url: this.props.carturl,
+      dataType: 'json',
+      type: 'PUT',
+      data: {product_id: this.props.id,operation:"subtract"},
+      success: function() {
+       window.location = "/cart.html";
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.carturl, status, err.toString());
+      }.bind(this)
+    });
+  },
+  addQuantity: function(e) {
+    e.preventDefault();
+    $.ajax({
+      url: this.props.carturl,
+      dataType: 'json',
+      type: 'PUT',
+      data: {product_id: this.props.id,operation:"addition"},
+      success: function() {
+       window.location = "/cart.html";
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.carturl, status, err.toString());
+      }.bind(this)
+    });
+  },
   getInitialState: function() {
     return {formId: '', formName: '', formCapacity: '', formPrice: '',formQuantity: ''};
   },
@@ -120,7 +150,7 @@ var Product = React.createClass({
           <div className="productName large-12 columns center-text medium-font medium-padding">{this.props.name}</div>
           <div className="productCapacity large-6 columns center-text small-font small-padding"><span className="alert round">Capacity: {this.props.capacity}</span></div>
           <div className="productPrice large-6 columns center-text small-font small-padding"><span className="alert round">Price: Rs. {this.props.price}</span></div>
-          <div className="productPrice large-6 columns center-text small-font small-padding"><span className="alert round">Quantity: {this.props.quantity}</span></div>
+          <div className="productPrice large-6 columns center-text small-font small-padding"><input type="button" name="add" value="-" onClick={this.subtractQuantity}/><span className="alert round">Quantity: {this.props.quantity}</span><input type="button" name="add" value="+" onClick={this.addQuantity}/></div>
           <div className="productAdd large-12 columns center-text medium-font medium-padding">
             <div className="button primary large-12 columns center-text"><a href={url} className="white">View Details</a></div>
             <form className="addToCartForm" onSubmit={this.handleSubmit}>

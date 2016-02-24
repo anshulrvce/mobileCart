@@ -106,4 +106,37 @@ router.delete('/api/cart', function(req, res) {
       res.send(data);
   });
 });
+
+router.put('/api/cart', function(req, res) {
+  var product_id = req.body.product_id;
+  var operation = req.body.operation;
+  console.log('updating quantity '+operation);
+   Cart.findOne({id:product_id},function(err, cart) {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    if(cart!=null){
+      if(operation=="subtract"){
+        if(cart.quantity==1)
+          Cart.remove({id:product_id},function(err) {
+            if (err) {
+                console.error(err);
+                process.exit(1);
+            }
+            } )
+        else
+          cart['quantity']=cart.quantity-1;
+      }
+      else
+        cart['quantity']=cart.quantity+1;
+        cart.save(function(err) {
+        if (err) {
+          return res.send(err);
+        }
+        res.json({ message: 'Cart updated!' });
+      });
+    }
+  });
+ });
 module.exports= router;
