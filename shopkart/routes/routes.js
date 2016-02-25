@@ -1,116 +1,113 @@
 var express= require ('express');
 var router = express.Router();
-
+var promise= require('bluebird');
 var Cart = require('../models/cart');
 var Product = require('../models/product');
 
+promise.promisifyAll(Product);
+
 router.get('/api/products', function(req, res) {
-  Product.find(function(err, data) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
+  Product.find()
+  .then(function(data){
     res.json(data);
+  }).catch(function(err){
+    console.log(err);
+    process.exit(1);
   });
+  
 });
 
 router.post('/api/products', function(req, res) {
     var newProduct = new Product(req.body);
-    newProduct.save(function(err){
-      if (err) {
-        console.error(err);
-        process.exit(1);
-      }
-      res.send(newProduct);
-    });
+    newProduct.save()
+    .then(function(data){
+      res.send(data);
+    }).catch(function(err){
+    console.log(err);
+    process.exit(1);
+  });
 });
 
 router.get('/api/product', function(req, res){
   var product_id = req.query.product_id;
-  Product.findOne({id:product_id},function(err, data) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    
-        res.json(data);
+  Product.findOne({id:product_id})
+  .then(function(data){
+    res.json(data);
+  }).catch(function(err){
+    console.log(err);
+    process.exit(1);
   });
 });
 
 
 router.get('/api/cart', function(req, res){
-  Cart.find(function(err, data) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
+  Cart.find()
+  .then(function(data){
     res.json(data);
+  }).catch(function(err){
+    console.log(err);
+    process.exit(1);
   });
 });
 
 router.post('/api/cart', function(req, res) {
   var product_id = req.body.product_id;
-   Cart.findOne({id:product_id},function(err, cart) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    if(cart!=null){
-      cart['quantity']+=1;
-      cart.save(function(err) {
-      if (err) {
-        return res.send(err);
+   Cart.findOne({id:product_id})
+   .then(function(cart){
+      if(cart!=null){
+          cart['quantity']+=1;
+          cart.save()
+          .then(function(){
+              res.json({ message: 'Cart updated!' });
+          }).catch(function(err){
+              console.log(err);
+              process.exit(1);
+          });
+      }else{
+          Product.findOne({id:product_id})
+          .then(function(product){
+              addedProduct=null;
+              addedProduct = {
+                id: product.id,
+                name: product.name,
+                capacity: product.capacity,
+                price: product.price,
+                image: product.image,
+                quantity:1
+              }
+              var cart = new Cart(addedProduct);
+              cart.save()
+              .then(function(cart){
+                  res.json(cart);
+              }).catch(function(){
+                  console.log(err);
+                  process.exit(1);
+              });
+          }).catch(function(err){
+              console.log(err);
+              process.exit(1);
+          });
       }
-
-      res.json({ message: 'Cart updated!' });
-    });
-    }
-    else{
-      Product.findOne({id:product_id},function(err, data) {
-    if (err) {
-      console.error(err);
+   }).catch(function(err){
+      console.log(err);
       process.exit(1);
-    }
-    product= data;
-    addedProduct = null;
-        addedProduct = {
-          id: product.id,
-          name: product.name,
-          capacity: product.capacity,
-          price: product.price,
-          image: product.image,
-          quantity:1
-        }
-   
-    
-     var cart = new Cart(addedProduct);
-       cart.save(function(err) {
-          if (err) {
-            console.error(err);
-            process.exit(1);
-          }
-          res.json(cart);
-        });   
-  });
- }
-});
+   });
  });
 
 router.delete('/api/cart', function(req, res) {
   var product_id = req.body.product_id;
-  Cart.remove({id:product_id},function(err, data) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-      res.send(data);
+  Cart.remove({id:product_id})
+  .then(function(data){
+    res.send(data);
+  }).catch(function(err){
+    console.log(err);
+    process.exit(1);
   });
 });
 
 router.put('/api/cart', function(req, res) {
   var product_id = req.body.product_id;
   var operation = req.body.operation;
-  console.log('updating quantity '+operation);
    Cart.findOne({id:product_id},function(err, cart) {
     if (err) {
       console.error(err);
