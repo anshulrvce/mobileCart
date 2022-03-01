@@ -1,0 +1,5 @@
+name: mobile-cart
+version: v1.0
+gitUrl: https://github.com/anshulrvce/express-docker/
+tag: template-v1.0
+type: ddd
